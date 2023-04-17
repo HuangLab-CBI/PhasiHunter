@@ -1,0 +1,61 @@
+#!/bin/bash
+# ----------> declaration variables <------------
+tmp=`which phasiHunter`
+wd=${tmp%/*}
+
+# ----------> parament capture start <------------
+if [ "$#" -eq 0 ] ; then echo -e "type ${0##*/} -h for help message"
+    exit 1
+fi
+if [ $1 = '-h' ]
+then
+echo "Usage:
+    phasiHunter subcommand options 
+
+subcommand:
+    preprocess:     generating map file for phasiRNA cluster prediction
+    phase:          predicting phasiRNA cluster based on multiple reference sequences
+    intergration:   intergrating phase output
+    visulization:   for phasiRNA cluster visulization
+    initiator:      for phasiRNA initiator prediction
+    deg:            for phasiRNA initiator or phase-target degradome verrification
+
+type phasiHunter subcommad -h for more subcommad detail"
+exit 1
+fi
+
+if [ "$#" -gt 0 ]
+    then
+    for (( i=1; i<="$#"; i++ )) ; do
+        case ${!i} in
+            -v)
+                echo "phasiHunter version 1.0"
+                exit 1
+                ;;
+        esac
+    done
+fi
+# ----------> parament capture end<------------
+
+tmp=(`echo $@`)
+parament=${tmp[@]:1:$#}
+
+[ $1 != 'preprocess' ] || bash $wd/bin/preprocess.sh $parament
+[ $1 != 'phase' ] || python3 $wd/bin/phase.py $parament
+[ $1 != 'integration' ] || python3 $wd/bin/integration.py $parament
+[ $1 != 'visulization' ] || python3 $wd/bin/visualization.py $parament
+[ $1 != 'initiator' ] || python3 $wd/bin/initiator.py $parament
+[ $1 != 'gff3' ] || python3 $wd/bin/GeneratingAnnoFromGff.py $parament
+[ $1 != 'chrconvert' ] || python3 $wd/bin/ncbiChrConvert.py $parament
+[ $1 != 'read' ] || python3 $wd/bin/readstdin.py $parament
+[ $1 != 'plotvenn' ] || python3 $wd/bin/plot_venn.py $parament
+[ $1 != 'filtercpm' ] || python3 $wd/bin/filter_cpm.py $parament
+[ $1 != 'seqio' ] || python3 $wd/bin/convertToPhaseTank.py $parament
+[ $1 != 'cphasetank' ] || perl $wd/bin/cPhaseTank.pl $parament
+[ $1 != 'gphasetank' ] || perl $wd/bin/gPhaseTank.pl $parament
+[ $1 != 'overlap' ] || python3 $wd/bin/overlap.py $parament
+[ $1 != 'format' ] || python3 $wd/bin/format.py $parament
+[ $1 != 'filter' ] || python3 $wd/bin/filter.py $parament
+[ $1 != 'search' ] || python3 $wd/bin/search.py $parament
+[ $1 != 'deg' ] || python3 $wd/bin/deg.py $parament
+[ $1 != 'database' ] || python3 $wd/bin/database.py $parament
