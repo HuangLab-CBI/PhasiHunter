@@ -68,4 +68,5 @@ phasihunter deg -i <degradome.map> -q <srr5049781_phasirna.fa> -j <srr5049781_ph
 
 # copyright
 copyright © crop bioinformatics group (cbi), college of agricultural, nanjing agricultural university
+
 free for academic use. for commercial use, please contact us (huangji@njau.edu.cn)
