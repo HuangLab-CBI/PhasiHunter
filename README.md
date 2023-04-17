@@ -1,69 +1,71 @@
-# phasiHunter
-welcome to phasiHunter 😉
-A multithreaded program for mining phasiRNA regulation pathway based on multiple reference sequence
+# phasihunter
+welcome to phasihunter 😉
+a multithreaded program for mining phasirna regulation pathway based on multiple reference sequence
 
 ![](https://sandbox-1314381151.cos.ap-nanjing.myqcloud.com/pic/202303200044049.png)
 
-# Table of contents
-- Dependencies 
-- Installation
-- Usage
+# table of contents
+- dependencies 
+- installation
+- use case
+- copyright
 
-# Dependencies
-phasiHunter is a CLI program runing on Linux platform. The correction runing of phasiHunter depends on some existing software.
-- Bowtie
-- Biopython
+# dependencies
+phasihunter is a cli program runing on linux platform. the correction runing of phasihunter depends on some existing software.
+- bowtie
+- biopython
 - bedtools
 - dnapi
 - trim_galore
 - seqkit
 
-# Installation
-1. clone phasiHunter
-`git clone https://github.com/HuangLab-CBI/phasiHunter.git .`
+# installation
+1. clone phasihunter
+`git clone https://github.com/huanglab-cbi/phasihunter.git .`
 
 2. setting enviroment variable in ~/.bashrc
-`export PATH=$PATH:<phasiHunter path>`
+`export path=$path:<phasihunter path>`
 
-now type `phasiHunter -h` to check phasiHunter whether installation correct
+now type `phasihunter -h` to check phasihunter whether installation correct
 
-# Usage
-type `phasiHunter -h` for Usage information
-![](https://sandbox-1314381151.cos.ap-nanjing.myqcloud.com/pic/202303200117824.png)
-
+# use case
 parament in < > means necessary; parament in [ ] means optional
-1. Data pre-process
+1. data pre-process
 ```bash
-phasiHunter preprocess -m r -i <SRR5049781.fastq.gz> -r <oryza_sativa_cdna.fa> -o <SRR5049781_cdna.map>
+phasihunter preprocess -m r -i <srr5049781.fastq.gz> -r <oryza_sativa_cdna.fa> -o <srr5049781_cdna.map>
 
-phasiHunter preprocess -m r -i <SRR5049781.fastq.gz> -r <oryza_sativa_gdna.fa> -o <SRR5049781_gdna.map>
+phasihunter preprocess -m r -i <srr5049781.fastq.gz> -r <oryza_sativa_gdna.fa> -o <srr5049781_gdna.map>
 ```
-2. phasiRNA and PHAS Loci prediction
+2. phasirna and phas loci prediction
 ```bash 
-phasiHunter phase -cm <SRR5049781_cdna.map> -c <oryza_sativa_cdna.fa> -gm <SRR5049781_gdna.map> -g <oryza_sativa_gdna.fa> -fa <SRR7851621_trimmed_format_filter.fa> -a [SRR5049781_allsiRNA.txt] -o [SRR5049781_phasiRNA.txt] -pl [21] -j [10] -pv [0.0001] -ps [15] -pr [0.4] 
+phasihunter phase -cm <srr5049781_cdna.map> -c <oryza_sativa_cdna.fa> -gm <srr5049781_gdna.map> -g <oryza_sativa_gdna.fa> -fa <srr7851621_trimmed_format_filter.fa> -a [srr5049781_allsirna.txt] -o [srr5049781_phasirna.txt] -pl [21] -j [10] -pv [0.0001] -ps [15] -pr [0.4] 
 ```
-3. phasiRNA and PHAS Loci result integration
+3. phasirna and phas loci result integration
 ```bash
-phasiHunter integration -io <SRR5049781_phasiRNA.txt> -ia <SRR5049781_allsiRNA.txt> -an <oryza_sativa_gdna.gff3> -o [SRR5049781_phasiRNA_dup.txt] -a [SRR5049781_allsiRNA_dup.txt] -s [SRR5049781_summary.txt] 
+phasihunter integration -io <srr5049781_phasirna.txt> -ia <srr5049781_allsirna.txt> -an <oryza_sativa_gdna.gff3> -o [srr5049781_phasirna_dup.txt] -a [srr5049781_allsirna_dup.txt] -s [srr5049781_summary.txt] 
 ```
-4. print phasiRNA_cluster plot, phasiRNA.fa, PHAS.fa
+4. print phasirna_cluster plot, phasirna.fa, phas.fa
 ```bash
-phasiHunter visulization -io <SRR5049781_phasiRNA_dup.txt> -ia <SRR5049781_allsiRNA_dup.txt> -a [SRR5049781_alignment.txt] -o [SRR5049781.phasiRNA.fa] -p [SRR5049781.PHAS.fa] -c [oryza_sativa_cdna.ga] -g [oryza_sativa_gdna.fa] -pc y -pg n
+phasihunter visulization -io <srr5049781_phasirna_dup.txt> -ia <srr5049781_allsirna_dup.txt> -a [srr5049781_alignment.txt] -o [srr5049781.phasirna.fa] -p [srr5049781.phas.fa] -c [oryza_sativa_cdna.ga] -g [oryza_sativa_gdna.fa] -pc y -pg n
 ```
 5. initiator prediction and verification
 ```bash 
-phasiHunter target -q <osa_miRNA.fa> -t <SRR5049781_PHAS.fa> -o <SRR5049781_miR.txt>
+phasihunter target -q <osa_mirna.fa> -t <srr5049781_phas.fa> -o <srr5049781_mir.txt>
 
-phasiHunter initiator -i <SRR5049781_phasiRNA_dup.txt> -j <SRR5049781_miR.txt> -o <SRR5049781_initiator.txt> -a <SRR5049781_initiator.fa>
+phasihunter initiator -i <srr5049781_phasirna_dup.txt> -j <srr5049781_mir.txt> -o <srr5049781_initiator.txt> -a <srr5049781_initiator.fa>
 
-phasiHunter target -q <SRR5049781_initiator.fa> -t <SRR5049781_PHAS.fa> -o <SRR5049781_initiator_target.txt>
+phasihunter target -q <srr5049781_initiator.fa> -t <srr5049781_phas.fa> -o <srr5049781_initiator_target.txt>
 
-phasiHunter deg -i <degradome.map> -q <osa_miRNA.fa> -j <SRR5049781_initiator_target.txt> -t <oryza_sativa_cdna.fa> -o [SRR5049781_initiator_verified.txt]
+phasihunter deg -i <degradome.map> -q <osa_mirna.fa> -j <srr5049781_initiator_target.txt> -t <oryza_sativa_cdna.fa> -o [srr5049781_initiator_verified.txt]
 ```
 
-6. phasiRNA target prediction and verification
+6. phasirna target prediction and verification
 ```bash
-phasiHunter target -q <SRR5049781_phasiRNA.fa> -t <oryza_sativa_cdna.fa> -o <SRR5049781_phasiRNA_target.txt>
+phasihunter target -q <srr5049781_phasirna.fa> -t <oryza_sativa_cdna.fa> -o <srr5049781_phasirna_target.txt>
 
-phasiHunter deg -i <degradome.map> -q <SRR5049781_phasiRNA.fa> -j <SRR5049781_phasiRNA_target.txt> -t <oryza_sativa_cdna.fa> -o [SRR5049781_phasiRNA_target_verified.txt]
+phasihunter deg -i <degradome.map> -q <srr5049781_phasirna.fa> -j <srr5049781_phasirna_target.txt> -t <oryza_sativa_cdna.fa> -o [srr5049781_phasirna_target_verified.txt]
 ```
+
+# copyright
+copyright © crop bioinformatics group (cbi), college of agricultural, nanjing agricultural university
+free for academic use. for commercial use, please contact us (huangji@njau.edu.cn)
