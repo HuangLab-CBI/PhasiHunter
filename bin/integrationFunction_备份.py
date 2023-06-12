@@ -1,3 +1,4 @@
+# WARNING: 未修复偏移的cluster组合在一起的bug 那个版本
 import time
 from sympy import binomial
 from collections import defaultdict
@@ -210,7 +211,6 @@ def SplitClusterIsland(cluster, island_number, phase_length):
         else:
             count += 1
             last = i
-            # dic[count].append(i)
     return dic
 
 def SplitCluster(final_cluster: list, island_number=5, phase_length=21):
@@ -1757,8 +1757,7 @@ def ParallelSecondScaning(parament):
 
     max_readn = 0
     sorted_list = sorted(list(set(final_cluster)))
-    candidate_cluster0 = SplitClusterIsland(sorted_list, island_number, phase_length)
-    candidate_cluster = SplitIsland1(candidate_cluster0)
+    candidate_cluster = SplitClusterIsland(sorted_list, island_number, phase_length)
     # candidate_cluster = SplitCluster(sorted_list, island_number, phase_length)
     for j in candidate_cluster:
         allsiRNA = []
@@ -1796,14 +1795,12 @@ def ParallelSecondScaning(parament):
                         end_pos = end_pos + phase_length
                         if strand == '+':
                             for i in range(start_pos, end_pos):
-                                # query = geneid + '\t' + '+' + str(i)
-                                query = geneid + '\t' + '+' + '\t' + str(i)
+                                query = geneid + '\t' + '+' + str(i)
                                 if query in final_allsiRNA:
                                     total_n += 1
                                     allsiRNA.append(str(final_allsiRNA[query]))
                             for i in range(start_pos - 2, end_pos - 2):
-                                # query = geneid + '\t' + '-' + str(i)
-                                query = geneid + '\t' + '-' + '\t' + str(i)
+                                query = geneid + '\t' + '-' + str(i)
                                 if query in final_allsiRNA:
                                     total_n += 1
                                     allsiRNA.append(str(final_allsiRNA[query]))
@@ -1840,14 +1837,9 @@ def ParallelSecondScaning(parament):
                                     phasiRNA.append(str(final_allsiRNA[query]))
 
                         # phase_number and pvalue cutoff
-                        if total_k >= phase_number and (end_pos - start_pos) >= 100:
-                        # if total_k >= phase_number:
-                            # for i in range(total_k, phase_length):
-                            #     pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
-                            tmp_variable = int((((end_pos - start_pos) * 2) / phase_length) - 1)
-                            for i in range(total_k, tmp_variable):
-                                # pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
-                                pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - tmp_variable, total_n - i) * binomial(tmp_variable, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
+                        if total_k >= phase_number:
+                            for i in range(total_k, phase_length):
+                                pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
                             if pvalue <= pvalue_cutoff and pvalue != 0.0:
                                 for i in range(len(phasiRNA)):
                                     value_list = phasiRNA[i].split('\t')
@@ -1963,11 +1955,8 @@ def ParallelSecondScaning(parament):
 
                             # phase_number and pvalue cutoff
                             if total_k >= phase_number:
-                                # for i in range(total_k, phase_length):
-                                    # pvalue += float(binomial((window_length) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((window_length) * 2 - 1, total_n))
-                                tmp_variable = int(((window_length * 2) / phase_length) - 1)
-                                for i in range(total_k, tmp_variable):
-                                    pvalue += float(binomial((window_length) * 2 - 1 - tmp_variable, total_n - i) * binomial(tmp_variable, i) / binomial((window_length) * 2 - 1, total_n))
+                                for i in range(total_k, phase_length):
+                                    pvalue += float(binomial((window_length) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((window_length) * 2 - 1, total_n))
                                 if pvalue <= pvalue_cutoff and pvalue != 0.0:
                                     for i in range(len(phasiRNA)):
                                         value_list = phasiRNA[i].split('\t')
@@ -2466,10 +2455,7 @@ def Overlap(coor, coor1, mr1, mr2, gene, trans):
             return False
     if 'C' in mr1 and 'HG' in mr2:
         list1 = [trans[gene][coor[0]], trans[gene][coor[1]]]
-        try:
-            list1 = sorted(list1)
-        except TypeError:
-            return False
+        list1 = sorted(list1)
         list2 = [coor1[0], coor1[1]]
         if IsOverlap(list1, list2):
             return True
@@ -2478,10 +2464,7 @@ def Overlap(coor, coor1, mr1, mr2, gene, trans):
 
     if 'C' in mr1 and 'PG' in mr2:
         list1 = [trans[gene][coor[0]], trans[gene][coor[1]]]
-        try:
-            list1 = sorted(list1)
-        except TypeError:
-            return False
+        list1 = sorted(list1)
         list2 = [coor1[0], coor1[1]]
         if IsOverlap(list1, list2):
             return True
@@ -2649,7 +2632,7 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
 def PHAS_Loci_out_write(PHAS_Loci_out, PHAS_Loci, PHAS_Loci1, passP):
     recorder = 0
     with open(PHAS_Loci_out, 'w') as fo:
-        fo.write(f'feature\tPHAS_Loci\tGenome_start\tGenome_end\ttranscript_start\ttranscript_end\tmethod_ref\tpvalue\tphase_score\tphase_ratio\ttag\trecorder\n')
+        fo.write(f'feature\tPHAS_Loci\tGenome_start\tGenome_end\ttranscript_start\ttranscript_end\tmethod_ref\tpvalue\tphase_score\tphase_ratio\ttag\n')
         for i in PHAS_Loci:
             l = i.split('\t')
             method_ref = l[6]
@@ -2667,46 +2650,3 @@ def PHAS_Loci_out_write(PHAS_Loci_out, PHAS_Loci, PHAS_Loci1, passP):
                 continue
             recorder += 1
             fo.write(f'{i}\t{recorder}\n')
-
-def SplitIsland1(candidate_cluster0, phase_length=21):
-    candidate_cluster = nestedDic()
-    parent_order = 1
-    for i in candidate_cluster0:
-        dic = [[]]
-        order = 0
-        object = (dic, order, candidate_cluster0[i])
-        out_list = literation_func(object)
-        for j in out_list:
-            if len(j) != 0:
-                candidate_cluster[parent_order] = j
-                parent_order += 1
-
-    return candidate_cluster
-
-def literation_func(lists, phase_length=21): 
-    if phase_length == 21:
-        candidate_list = [0, 2, 19]
-    elif phase_length == 24:
-        candidate_list = [0, 2, 19]
-    dic = lists[0]
-    order = lists[1]
-    list = lists[2]
-    left_list = []
-    if len(list) != 0:
-        former  = list[0]
-    else:
-        return dic
-
-
-    for i in list:
-        test = (i - former) % phase_length
-        if test in candidate_list:
-            dic[order].append(i)
-            former = i
-        else:
-            left_list.append(i)
-    order += 1
-    dic.append([])
-    
-    litetation_object = (dic, order, left_list)
-    return literation_func(litetation_object, phase_length)

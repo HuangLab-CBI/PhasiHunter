@@ -210,7 +210,6 @@ def SplitClusterIsland(cluster, island_number, phase_length):
         else:
             count += 1
             last = i
-            # dic[count].append(i)
     return dic
 
 def SplitCluster(final_cluster: list, island_number=5, phase_length=21):
@@ -1374,7 +1373,6 @@ def ParseTranscriptFeature(tmp_gff_bed):
 def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_allsiRNA, transcriptAnno, flnc_anno_dic):
     intergration_FLNC = nestedDic()
     intergration = nestedDic()
-    tag_dic = nestedDic()
     Vprint('start writing data...')
     fo_phasiRNA.write('>Hypergeometric' + "\n")
     fo_phasiRNA.write('#H cDNA based result' + "\n")
@@ -1388,7 +1386,7 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
             out_marker = "HC" + str(record_marker)
             for pos in hout['hc']['phasiRNA'][gene][cluster]:
                 pvalue = float(hout['hc']['phasiRNA'][gene][cluster][pos].split("\t")[-1])
-                intergration[feature][gene]['H']['C'][coor] = ['-', '-', pvalue, out_marker]
+                intergration[feature][gene]['H']['C'][coor] = ['-', '-', pvalue]
                 fo_phasiRNA.write(hout['hc']['phasiRNA'][gene][cluster][pos] + "\t" + annotation + "\t" + out_marker + "\n")
 
     fo_phasiRNA.write('#H gDNA based result' + "\n")
@@ -1407,10 +1405,9 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
                     for i in hanno[gene][coor][feature]:
                         i1 = i.split("-")[0]
                         if i1 == 'Intergenic':
-                            intergration[feature][chr_ + '_' + str(coor[0]) + ':' + str(coor[1])]['H']['G'][coor] = ['-', '-', pvalue, out_marker]
-                            tag_dic[f'{chr_}\t{out_marker[:2]}\t{str(coor[0])}\t{str(coor[1])}'] = out_marker
+                            intergration[feature][chr_ + '_' + str(coor[0]) + ':' + str(coor[1])]['H']['G'][coor] = ['-', '-', pvalue]
                         else:
-                            intergration[feature][i]['H']['G'][coor] = ['-', '-', pvalue, out_marker]
+                            intergration[feature][i]['H']['G'][coor] = ['-', '-', pvalue]
                         annotation.append(feature + ':' + i)
                 annotation1 = ";".join(list(set(annotation)))
                 fo_phasiRNA.write(hout['hg']['phasiRNA'][gene][cluster][pos] + "\t" + annotation1 + "\t" + out_marker + "\n")
@@ -1435,10 +1432,10 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
             for pos in hout['hf']['phasiRNA'][gene][cluster]:
                 pvalue = float(hout['hf']['phasiRNA'][gene][cluster][pos].split("\t")[-1])
                 try:
-                    intergration[feature][flnc_anno_dic[gene]]['H']['F'][coor] = ['-', '-', pvalue, out_marker]
+                    intergration[feature][flnc_anno_dic[gene]]['H']['F'][coor] = ['-', '-', pvalue]
                 except TypeError:
-                    intergration['FLNC'][flnc_anno_dic[gene]]['H']['F'][coor] = ['-', '-', pvalue, out_marker]
-                    intergration_FLNC[gene]['H']['F'][coor] = ['-', '-', pvalue, out_marker]
+                    intergration['FLNC'][flnc_anno_dic[gene]]['H']['F'][coor] = ['-', '-', pvalue]
+                    intergration_FLNC[gene]['H']['F'][coor] = ['-', '-', pvalue]
                 fo_phasiRNA.write(hout['hf']['phasiRNA'][gene][cluster][pos] + "\t" + annotation + "\t" + out_marker + "\n")
     
     fo_phasiRNA.write('>PhaseScore' + "\n")
@@ -1454,7 +1451,7 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
             for key in pout['pc']['phasiRNA'][gene][record]:
                 phaseRatio = float(pout['pc']['phasiRNA'][gene][record][key].split("\t")[-6])
                 phaseScore = float(pout['pc']['phasiRNA'][gene][record][key].split("\t")[-3])
-                intergration[feature][gene]['P']['C'][coor] = [phaseRatio, phaseScore, '-', out_marker]
+                intergration[feature][gene]['P']['C'][coor] = [phaseRatio, phaseScore, '-']
                 tmp  = "\t".join(pout['pc']['phasiRNA'][gene][record][key].split("\t")[:-2]) + "\t" + pout['pc']['phasiRNA'][gene][record][key].split("\t")[-1]
                 fo_phasiRNA.write(tmp + "\t" + annotation + "\t" + out_marker + "\n")
 
@@ -1477,10 +1474,9 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
                     for i in panno[geneid][coor][feature]:
                         i1 = i.split('-')[0]
                         if i1 == 'Intergenic':
-                            intergration[feature][geneid + "_" + str(coor[0]) + ":" + str(coor[1])]['P']['G'][coor] = [phaseRatio, phaseScore, '-', out_marker]
-                            tag_dic[f'{geneid}\t{out_marker[:2]}\t{str(coor[0])}\t{str(coor[1])}'] = out_marker
+                            intergration[feature][geneid + "_" + str(coor[0]) + ":" + str(coor[1])]['P']['G'][coor] = [phaseRatio, phaseScore, '-']
                         else:
-                            intergration[feature][i]['P']['G'][coor] = [phaseRatio, phaseScore, '-', out_marker]
+                            intergration[feature][i]['P']['G'][coor] = [phaseRatio, phaseScore, '-']
                         annotation.append(feature + ':' + i)
                 annotation1 = ';'.join(list(set(annotation)))
                 fo_phasiRNA.write(geneid + "\t" + tmp + "\t" + annotation1 + "\t" + out_marker + "\n")
@@ -1501,10 +1497,10 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
                 phaseRatio = float(pout['pf']['phasiRNA'][gene][record][key].split("\t")[-6])
                 phaseScore = float(pout['pf']['phasiRNA'][gene][record][key].split("\t")[-3])
                 try:
-                    intergration[feature][flnc_anno_dic[gene]]['P']['F'][coor] = [phaseRatio, phaseScore, '-', out_marker]
+                    intergration[feature][flnc_anno_dic[gene]]['P']['F'][coor] = [phaseRatio, phaseScore, '-']
                 except TypeError:
-                    intergration['FLNC'][flnc_anno_dic[gene]]['P']['F'][coor] = [phaseRatio, phaseScore, '-', out_marker]
-                    intergration_FLNC[gene]['P']['F'][coor] = [phaseRatio, phaseScore, '-', out_marker]
+                    intergration['FLNC'][flnc_anno_dic[gene]]['P']['F'][coor] = [phaseRatio, phaseScore, '-']
+                    intergration_FLNC[gene]['P']['F'][coor] = [phaseRatio, phaseScore, '-']
                 tmp  = "\t".join(pout['pf']['phasiRNA'][gene][record][key].split("\t")[:-2]) + "\t" + pout['pf']['phasiRNA'][gene][record][key].split("\t")[-1]
                 fo_phasiRNA.write(tmp + "\t" + annotation + "\t" + out_marker + "\n")
 
@@ -1596,9 +1592,9 @@ def Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_alls
             out_marker = "PF" + str(record_marker)
             for key in pout['pf']['allsiRNA'][gene][record]:
                 tmp  = "\t".join(pout['pf']['allsiRNA'][gene][record][key].split("\t")[:-2]) + "\t" + pout['pf']['allsiRNA'][gene][record][key].split("\t")[-1]
-                fo_allsiRNA.write(tmp + "\t" + annotation + "\t" + out_marker + "\n")
+                fo_allsiRNA.write(tmp + "\t" + "-" + "\t" + out_marker + "\n")
     
-    return (intergration, intergration_FLNC, tag_dic)
+    return (intergration, intergration_FLNC)
 
 def ParallelHypergeometric(allsiRNA, phasiRNA, setting1, parallel_number, island_number):
     # worked
@@ -1757,8 +1753,7 @@ def ParallelSecondScaning(parament):
 
     max_readn = 0
     sorted_list = sorted(list(set(final_cluster)))
-    candidate_cluster0 = SplitClusterIsland(sorted_list, island_number, phase_length)
-    candidate_cluster = SplitIsland1(candidate_cluster0)
+    candidate_cluster = SplitClusterIsland(sorted_list, island_number, phase_length)
     # candidate_cluster = SplitCluster(sorted_list, island_number, phase_length)
     for j in candidate_cluster:
         allsiRNA = []
@@ -1770,8 +1765,6 @@ def ParallelSecondScaning(parament):
             if e >= 4:
                 for length in list(sorted(pair_pos[e].keys()))[::-1]:
                     for tuple_ in pair_pos[e][length]:
-                        # allsiRNA = []
-                        # phasiRNA = []
                         total_n = 0
                         total_k = 0
                         pvalue = 0
@@ -1796,14 +1789,12 @@ def ParallelSecondScaning(parament):
                         end_pos = end_pos + phase_length
                         if strand == '+':
                             for i in range(start_pos, end_pos):
-                                # query = geneid + '\t' + '+' + str(i)
-                                query = geneid + '\t' + '+' + '\t' + str(i)
+                                query = geneid + '\t' + '+' + str(i)
                                 if query in final_allsiRNA:
                                     total_n += 1
                                     allsiRNA.append(str(final_allsiRNA[query]))
                             for i in range(start_pos - 2, end_pos - 2):
-                                # query = geneid + '\t' + '-' + str(i)
-                                query = geneid + '\t' + '-' + '\t' + str(i)
+                                query = geneid + '\t' + '-' + str(i)
                                 if query in final_allsiRNA:
                                     total_n += 1
                                     allsiRNA.append(str(final_allsiRNA[query]))
@@ -1840,14 +1831,9 @@ def ParallelSecondScaning(parament):
                                     phasiRNA.append(str(final_allsiRNA[query]))
 
                         # phase_number and pvalue cutoff
-                        if total_k >= phase_number and (end_pos - start_pos) >= 100:
-                        # if total_k >= phase_number:
-                            # for i in range(total_k, phase_length):
-                            #     pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
-                            tmp_variable = int((((end_pos - start_pos) * 2) / phase_length) - 1)
-                            for i in range(total_k, tmp_variable):
-                                # pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
-                                pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - tmp_variable, total_n - i) * binomial(tmp_variable, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
+                        if total_k >= phase_number:
+                            for i in range(total_k, phase_length):
+                                pvalue += float(binomial((end_pos - start_pos) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((end_pos - start_pos) * 2 - 1, total_n))
                             if pvalue <= pvalue_cutoff and pvalue != 0.0:
                                 for i in range(len(phasiRNA)):
                                     value_list = phasiRNA[i].split('\t')
@@ -1963,11 +1949,8 @@ def ParallelSecondScaning(parament):
 
                             # phase_number and pvalue cutoff
                             if total_k >= phase_number:
-                                # for i in range(total_k, phase_length):
-                                    # pvalue += float(binomial((window_length) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((window_length) * 2 - 1, total_n))
-                                tmp_variable = int(((window_length * 2) / phase_length) - 1)
-                                for i in range(total_k, tmp_variable):
-                                    pvalue += float(binomial((window_length) * 2 - 1 - tmp_variable, total_n - i) * binomial(tmp_variable, i) / binomial((window_length) * 2 - 1, total_n))
+                                for i in range(total_k, phase_length):
+                                    pvalue += float(binomial((window_length) * 2 - 1 - phase_length, total_n - i) * binomial(phase_length, i) / binomial((window_length) * 2 - 1, total_n))
                                 if pvalue <= pvalue_cutoff and pvalue != 0.0:
                                     for i in range(len(phasiRNA)):
                                         value_list = phasiRNA[i].split('\t')
@@ -2109,19 +2092,19 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
 
     # consider only P method?
     list_ = []
-    # list_.append(f'feature\tPHAS_Loci\tGenome_start\tGenome_end\ttranscript_start\ttranscript_end\tmethod_ref\tpvalue\tphase_score\tphase_ratio\ttag')
+    list_.append(f'feature\tPHAS_Loci\tGenome_start\tGenome_end\ttranscript_start\ttranscript_end\tmethod_ref\tpvalue\tphase_score\tphase_ratio')
     for gene in list(intergration.keys()):
         if relation_dic[gene] == 'Other' or relation_dic[gene] == 'intron' or relation_dic[gene] == 'FLNC':
             continue
         for ref in ['C', 'G', 'F']:
             for method in ['H', 'P']:
                 for coor in list(intergration[gene][method][ref].keys()):
-                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio, tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio, c_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio, c1_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
+                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
                     method_ref = []
                     method_ref.append(method+ref)
                     if intergration[gene][method][ref][coor] == '-':
@@ -2132,7 +2115,6 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                         c_pvalue = intergration[gene][method][ref][coor][2]
                         c_genome_start = trans[gene][coor[0]]
                         c_genome_end = trans[gene][coor[1]]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'C' and method == 'P':
                         c_transcript_start = coor[0]
                         c_transcript_end = coor[1]
@@ -2140,29 +2122,24 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                         c_phase_ratio = intergration[gene][method][ref][coor][0]
                         c_genome_start = trans[gene][coor[0]]
                         c_genome_end = trans[gene][coor[1]]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'F' and method == 'H':
                         c_transcript_start = coor[0]
                         c_transcript_end = coor[1]
                         c_pvalue = intergration[gene][method][ref][coor][2]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'F' and method == 'P':
                         c_transcript_start = coor[0]
                         c_transcript_end = coor[1]
                         c_phase_score = intergration[gene][method][ref][coor][1]
                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'G' and method == 'H':
                         c_genome_start = coor[0]
                         c_genome_end = coor[1]
                         c_pvalue = intergration[gene][method][ref][coor][2]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'G' and method == 'P':
                         c_genome_start = coor[0]
                         c_genome_end = coor[1]
                         c_phase_score = intergration[gene][method][ref][coor][1]
                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                        c_tag = intergration[gene][method][ref][coor][3]
 
                     for ref1 in ['F', 'G', 'C']:
                         for method1 in ['P', 'H']:
@@ -2180,7 +2157,6 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_pvalue = intergration[gene][method][ref][coor][2]
                                         c_genome_start = trans[gene][coor[0]]
                                         c_genome_end = trans[gene][coor[1]]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'C' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
@@ -2188,63 +2164,52 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
                                         c_genome_start = trans[gene][coor[0]]
                                         c_genome_end = trans[gene][coor[1]]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'H':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'H':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'P':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     
                                     if ref1 == 'C' and method1 == 'H':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_pvalue = intergration[gene][method1][ref1][coor1][2]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'C' and method1 == 'P':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_phase_score = intergration[gene][method1][ref1][coor1][1]
                                         c1_phase_ratio = intergration[gene][method1][ref1][coor1][0]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'F' and method1 == 'H':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_pvalue = intergration[gene][method1][ref1][coor1][2]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'F' and method1 == 'P':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_phase_score = intergration[gene][method1][ref1][coor1][1]
                                         c1_phase_ratio = intergration[gene][method1][ref1][coor1][0]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'G' and method1 == 'H':
                                         c1_genome_start = coor1[0]
                                         c1_genome_end = coor1[1]
                                         c1_pvalue = intergration[gene][method1][ref1][coor1][2]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'G' and method1 == 'P':
                                         c1_genome_start = coor1[0]
                                         c1_genome_end = coor1[1]
                                         c1_phase_score = intergration[gene][method1][ref1][coor1][1]
                                         c1_phase_ratio = intergration[gene][method1][ref1][coor1][0]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
 
                                     intergration[gene][method1][ref1][coor1] = '-'
                                 else:
@@ -2257,7 +2222,6 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_pvalue = intergration[gene][method][ref][coor][2]
                                         c_genome_start = trans[gene][coor[0]]
                                         c_genome_end = trans[gene][coor[1]]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'C' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
@@ -2265,29 +2229,24 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
                                         c_genome_start = trans[gene][coor[0]]
                                         c_genome_end = trans[gene][coor[1]]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'H':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'H':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'P':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
 
                     if c_genome_start != '-':
                         genome_start = c_genome_start
@@ -2320,24 +2279,19 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                     else:
                         phase_ratio = c1_phase_ratio
                     
-                    if c_tag != '-':
-                        tag = c_tag
-                    else:
-                        tag = c1_tag
-                    
-                    list_.append(f"{relation_dic[gene]}\t{gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}\t{tag}")
+                    list_.append(f"{relation_dic[gene]}\t{gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}")
                     intergration[gene][method][ref][coor] = '-'
 
     for gene in list(intergration_FLNC.keys()):
         for ref in ['F']:
             for method in ['H', 'P']:
                 for coor in list(intergration_FLNC[gene][method][ref].keys()):
-                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio, tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio, c_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio, c1_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
+                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
                     method_ref = []
                     method_ref.append(method+ref)
                     if intergration_FLNC[gene][method][ref][coor] == '-':
@@ -2346,13 +2300,11 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                         c_transcript_start = coor[0]
                         c_transcript_end = coor[1]
                         c_pvalue = intergration_FLNC[gene][method][ref][coor][2]
-                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
                     if ref == 'F' and method == 'P':
                         c_transcript_start = coor[0]
                         c_transcript_end = coor[1]
                         c_phase_score = intergration_FLNC[gene][method][ref][coor][1]
                         c_phase_ratio = intergration_FLNC[gene][method][ref][coor][0]
-                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
 
                     for ref1 in ['F']:
                         for method1 in ['P', 'H']:
@@ -2368,25 +2320,21 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_pvalue = intergration_FLNC[gene][method][ref][coor][2]
-                                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_phase_score = intergration_FLNC[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration_FLNC[gene][method][ref][coor][0]
-                                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
                                     
                                     if ref1 == 'F' and method1 == 'H':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_pvalue = intergration_FLNC[gene][method1][ref1][coor1][2]
-                                        c1_tag = intergration_FLNC[gene][method1][ref1][coor1][3]
                                     if ref1 == 'F' and method1 == 'P':
                                         c1_transcript_start = coor1[0]
                                         c1_transcript_end = coor1[1]
                                         c1_phase_score = intergration_FLNC[gene][method1][ref1][coor1][1]
                                         c1_phase_ratio = intergration_FLNC[gene][method1][ref1][coor1][0]
-                                        c1_tag = intergration_FLNC[gene][method1][ref1][coor1][3]
 
                                     intergration_FLNC[gene][method1][ref1][coor1] = '-'
                                 else:
@@ -2397,13 +2345,11 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_pvalue = intergration_FLNC[gene][method][ref][coor][2]
-                                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
                                     if ref == 'F' and method == 'P':
                                         c_transcript_start = coor[0]
                                         c_transcript_end = coor[1]
                                         c_phase_score = intergration_FLNC[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration_FLNC[gene][method][ref][coor][0]
-                                        c_tag = intergration_FLNC[gene][method][ref][coor][3]
 
                     if c_transcript_start != '-':
                         transcript_start = c_transcript_start
@@ -2428,12 +2374,7 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                     else:
                         phase_ratio = c1_phase_ratio
                     
-                    if c_tag != '-':
-                        tag = c_tag
-                    else:
-                        tag = c1_tag
-
-                    list_.append(f"{flnc_anno_dic[gene]}\t{gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}\t{tag}")
+                    list_.append(f"{flnc_anno_dic[gene]}\t{gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}")
                     intergration_FLNC[gene][method][ref][coor] = '-'
     return list_
 
@@ -2466,10 +2407,7 @@ def Overlap(coor, coor1, mr1, mr2, gene, trans):
             return False
     if 'C' in mr1 and 'HG' in mr2:
         list1 = [trans[gene][coor[0]], trans[gene][coor[1]]]
-        try:
-            list1 = sorted(list1)
-        except TypeError:
-            return False
+        list1 = sorted(list1)
         list2 = [coor1[0], coor1[1]]
         if IsOverlap(list1, list2):
             return True
@@ -2478,10 +2416,7 @@ def Overlap(coor, coor1, mr1, mr2, gene, trans):
 
     if 'C' in mr1 and 'PG' in mr2:
         list1 = [trans[gene][coor[0]], trans[gene][coor[1]]]
-        try:
-            list1 = sorted(list1)
-        except TypeError:
-            return False
+        list1 = sorted(list1)
         list2 = [coor1[0], coor1[1]]
         if IsOverlap(list1, list2):
             return True
@@ -2494,7 +2429,7 @@ def Overlap(coor, coor1, mr1, mr2, gene, trans):
     if 'G' in mr1 and 'F' in mr2:
         return True
 
-def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
+def Intergenic_PHAS_Loci(intergrationfile):
     trans = {}
     intergration = nestedDic()
     with open(intergrationfile, 'r') as fn:
@@ -2513,12 +2448,7 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                         pvalue = g_pvalue.split(',')[idx]
                         coor0 = int(h_coor.replace('(', '').replace(')', '').split(':')[0])
                         coor1 = int(h_coor.replace('(', '').replace(')', '').split(':')[1])
-                        query = geneid.split('_')[0] + '_' + geneid.split('_')[1] + '\t' + 'HG' + '\t' + str(coor0) + '\t' + str(coor1)
-                        if query in tag_dic:
-                            tmp_tag = tag_dic[query]
-                        else:
-                            tmp_tag = '-'
-                        intergration[geneid]['H']['G'][(coor0, coor1)] = ['-', '-', pvalue, tmp_tag]
+                        intergration[geneid]['H']['G'][(coor0, coor1)] = ['-', '-', pvalue]
             if 'P' in method:
                 for p_coor in p_genome_coordinate.split(','):
                     if p_coor != '-':
@@ -2527,12 +2457,7 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                         phase_ratio = g_phaseratio.split(',')[idx]
                         coor0 = int(p_coor.replace('(', '').replace(')', '').split(':')[0])
                         coor1 = int(p_coor.replace('(', '').replace(')', '').split(':')[1])
-                        query = geneid.split('_')[0] + '_' + geneid.split('_')[1] + '\t' + 'PG' + '\t' + str(coor0) + '\t' + str(coor1)
-                        if query in tag_dic:
-                            tmp_tag = tag_dic[query]
-                        else:
-                            tmp_tag = '-'
-                        intergration[geneid]['P']['G'][(coor0, coor1)] = [phase_ratio, phase_score, '-', tmp_tag]
+                        intergration[geneid]['P']['G'][(coor0, coor1)] = [phase_ratio, phase_score, '-']
 
     list_ = []
     order = 0
@@ -2540,12 +2465,12 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
         for ref in ['G']:
             for method in ['H', 'P']:
                 for coor in list(intergration[gene][method][ref].keys()):
-                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio, tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio, c_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
-                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio, c1_tag = \
-                    '-', '-', '-', '-', '-', '-', '-', '-'
+                    genome_start, genome_end, transcript_start, transcript_end, pvalue, phase_score, phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c_genome_start, c_genome_end, c_transcript_start, c_transcript_end, c_pvalue, c_phase_score, c_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
+                    c1_genome_start, c1_genome_end, c1_transcript_start, c1_transcript_end, c1_pvalue, c1_phase_score, c1_phase_ratio = \
+                    '-', '-', '-', '-', '-', '-', '-'
                     method_ref = []
                     method_ref.append(method+ref)
                     if intergration[gene][method][ref][coor] == '-':
@@ -2554,13 +2479,11 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                         c_genome_start = coor[0]
                         c_genome_end = coor[1]
                         c_pvalue = intergration[gene][method][ref][coor][2]
-                        c_tag = intergration[gene][method][ref][coor][3]
                     if ref == 'G' and method == 'P':
                         c_genome_start = coor[0]
                         c_genome_end = coor[1]
                         c_phase_score = intergration[gene][method][ref][coor][1]
                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                        c_tag = intergration[gene][method][ref][coor][3]
 
                     for ref1 in ['G']:
                         for method1 in ['P', 'H']:
@@ -2576,25 +2499,21 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'P':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     
                                     if ref1 == 'G' and method1 == 'H':
                                         c1_genome_start = coor1[0]
                                         c1_genome_end = coor1[1]
                                         c1_pvalue = intergration[gene][method1][ref1][coor1][2]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
                                     if ref1 == 'G' and method1 == 'P':
                                         c1_genome_start = coor1[0]
                                         c1_genome_end = coor1[1]
                                         c1_phase_score = intergration[gene][method1][ref1][coor1][1]
                                         c1_phase_ratio = intergration[gene][method1][ref1][coor1][0]
-                                        c1_tag = intergration[gene][method1][ref1][coor1][3]
 
                                     intergration[gene][method1][ref1][coor1] = '-'
                                 else:
@@ -2605,13 +2524,11 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_pvalue = intergration[gene][method][ref][coor][2]
-                                        c_tag = intergration[gene][method][ref][coor][3]
                                     if ref == 'G' and method == 'P':
                                         c_genome_start = coor[0]
                                         c_genome_end = coor[1]
                                         c_phase_score = intergration[gene][method][ref][coor][1]
                                         c_phase_ratio = intergration[gene][method][ref][coor][0]
-                                        c_tag = intergration[gene][method][ref][coor][3]
 
                     if c_genome_start != '-':
                         genome_start = c_genome_start
@@ -2635,78 +2552,23 @@ def Intergenic_PHAS_Loci(intergrationfile, tag_dic):
                     else:
                         phase_ratio = c1_phase_ratio
                     
-                    if c_tag != '-':
-                        tag = c_tag
-                    else:
-                        tag = c1_tag
-
                     order += 1
-                    new_gene = gene.split('_')[0]+'_'+gene.split('_')[1] + '#' + str(order)
-                    list_.append(f"Intergenic\t{new_gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}\t{tag}")
+                    new_gene = gene.split('_')[0] + '#' + str(order)
+                    list_.append(f"Intergenic\t{new_gene}\t{genome_start}\t{genome_end}\t{transcript_start}\t{transcript_end}\t{','.join(list(set(method_ref)))}\t{pvalue}\t{phase_score}\t{phase_ratio}")
                     intergration[gene][method][ref][coor] = '-'
     return list_
 
 def PHAS_Loci_out_write(PHAS_Loci_out, PHAS_Loci, PHAS_Loci1, passP):
-    recorder = 0
     with open(PHAS_Loci_out, 'w') as fo:
-        fo.write(f'feature\tPHAS_Loci\tGenome_start\tGenome_end\ttranscript_start\ttranscript_end\tmethod_ref\tpvalue\tphase_score\tphase_ratio\ttag\trecorder\n')
         for i in PHAS_Loci:
             l = i.split('\t')
             method_ref = l[6]
             if passP == 'y' and 'H' not in method_ref:
                 continue
-            if i.startswith('feature'):
-                fo.write(f'{i}\trecorder\n')
-                continue
-            recorder += 1
-            fo.write(f'{i}\t{recorder}\n')
+            fo.write(f'{i}\n')
         for i in PHAS_Loci1:
             l = i.split('\t')
             method_ref = l[6]
             if passP == 'y' and 'H' not in method_ref:
                 continue
-            recorder += 1
-            fo.write(f'{i}\t{recorder}\n')
-
-def SplitIsland1(candidate_cluster0, phase_length=21):
-    candidate_cluster = nestedDic()
-    parent_order = 1
-    for i in candidate_cluster0:
-        dic = [[]]
-        order = 0
-        object = (dic, order, candidate_cluster0[i])
-        out_list = literation_func(object)
-        for j in out_list:
-            if len(j) != 0:
-                candidate_cluster[parent_order] = j
-                parent_order += 1
-
-    return candidate_cluster
-
-def literation_func(lists, phase_length=21): 
-    if phase_length == 21:
-        candidate_list = [0, 2, 19]
-    elif phase_length == 24:
-        candidate_list = [0, 2, 19]
-    dic = lists[0]
-    order = lists[1]
-    list = lists[2]
-    left_list = []
-    if len(list) != 0:
-        former  = list[0]
-    else:
-        return dic
-
-
-    for i in list:
-        test = (i - former) % phase_length
-        if test in candidate_list:
-            dic[order].append(i)
-            former = i
-        else:
-            left_list.append(i)
-    order += 1
-    dic.append([])
-    
-    litetation_object = (dic, order, left_list)
-    return literation_func(litetation_object, phase_length)
+            fo.write(f'{i}\n')

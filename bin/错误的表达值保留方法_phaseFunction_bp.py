@@ -183,8 +183,6 @@ def ParseGff3(file: str):
     return dic
 
 def ParseHypergeometricMap(map, phase_length):
-    phaseAbun = nestedDic()
-    unphaseAbun = nestedDic()
     """parse map file
 
     Parameters
@@ -214,25 +212,19 @@ def ParseHypergeometricMap(map, phase_length):
         sRNA_len = int(len(line1[4]))
         key = geneid+'\t'+strand+'\t'+str(sRNA_pos)
         if (key) in genewithhits.keys():
-        # // 有phase_length长度的sRNA那么就仅保存phase_length长度的abundance
             no=float((genewithhits[key]).split('\t')[0])
             no+=sRNA_num
             if sRNA_len == phase_length:
-                phaseAbun[key] = phaseAbun[key] + sRNA_num
-                genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+                genewithhits[key]=str(sRNA_num)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
             elif genewithhits[key].split('\t')[3] == str(phase_length):
                 #WARNING: bug 来源地,因为这里只是保留了phase length，但是没有保留和phase length 相匹配的序列， 因此sRNA序列被覆盖了，所以结果表现出 输出的序列和打印的序列长度不一致的情况。
+                abun = genewithhits[key].split('\t')[0]
                 seq = genewithhits[key].split('\t')[2]
-                genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+ seq +'\t'+str(phase_length)
+                genewithhits[key]=str(abun)+'\t'+sRNA+'\t'+ seq +'\t'+str(phase_length)
             else:
                 genewithhits[key]=str(no)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
         else:
             genewithhits[key]=str(sRNA_num)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
-            if sRNA_len == phase_length:
-                phaseAbun[key] = sRNA_num
-            else:
-                phaseAbun[key] = 0
-
     return genewithhits
 
 def SplitCluster(final_cluster: list, island_number=5, phase_length=21):

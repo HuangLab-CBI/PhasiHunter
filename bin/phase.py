@@ -36,11 +36,12 @@ if __name__ == '__main__':
     method='b'
     phase_number = 4
     phaseScore_cutoff = 15
-    phaseRatio_cutoff = 0.5
+    phaseRatio_cutoff = 0.4
     max_hits = 10
+    delete_phasiHuter_bowtieIndex = 'y'
     parallel_number = 1
     extended_maplen = 80
-    pvalue_cutoff = 0.001
+    pvalue_cutoff = 0.0005
     min_read_num = 0
     cdna_mapfile = ''
     gdna_mapfile = ''
@@ -48,6 +49,8 @@ if __name__ == '__main__':
     cdna = ''
     gdna = ''
     flnc = ''
+    tmpoutputfilename = 'phase_o.txt'
+    tmpalloutputfilename = 'phase_a.txt'
     # enable_cdna = True
     # PHASgene_name = []
     # hypergeometric_result = nestedDic()
@@ -73,7 +76,6 @@ if __name__ == '__main__':
             -pv: float --  pvalue cutoff, default=0.001, only function with h method applied
             -ps: float --  phase score cutoff, default=15, only function with p method applied
             -pr: float --  phase ratio cutoff, default=0.4, only function with p method applied
-            -mn: int   --  min read num, default=0, only function with p method applied  
 
             # optional options
             -f:  file  --  full length transcriptome sequence, fasta file
@@ -82,6 +84,7 @@ if __name__ == '__main__':
             -fm: file  --  map file based on full length transcriptome sequence
 
             # other
+            -cl: str  --  delete .phasiHuter_bowtieIndex, y|n, default=y
             -v:       --  print version information
             -h:       --  print help information
 
@@ -114,6 +117,8 @@ if __name__ == '__main__':
             min_read_num = int(sys.argv[i+1])
         elif sys.argv[i] == '-c':
             cdna = sys.argv[i+1]
+        elif sys.argv[i] == '-cl':
+            delete_phasiHuter_bowtieIndex = sys.argv[i+1]
         elif sys.argv[i] == '-g':
             gdna = sys.argv[i+1]
         elif sys.argv[i] == '-f':
@@ -165,8 +170,9 @@ if __name__ == '__main__':
             ParallelPhaseScore(parallel_number, 'flnc', flnc_mapfile, flnc, phase_length, extended_maplen, tmp_file, max_hits, real_gdna_map, phase_number, o_, fa, all_, phaseScore_cutoff, phaseRatio_cutoff, island_number)
     
     if gdna_mapfile != '' and gdna != '':
-        os.system('rm ' +  tmp_file)
-        os.system('rm ' + real_gdna_map)
+        if method == 'p' or method == 'b':
+            os.system('rm ' +  tmp_file)
+            os.system('rm ' + real_gdna_map)
 
     o_.close()
     all_.close()

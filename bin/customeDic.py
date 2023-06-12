@@ -17,3 +17,18 @@ def FourDepDic():
 
 def FiveDepDic():
     return defaultdict(FourDepDic)
+
+def OneSetDic():
+    return defaultdict(set)
+
+def TwoSetDic():
+    return defaultdict(OneSetDic)
+
+def ThreeSetDic():
+    return defaultdict(TwoSetDic)
+
+def FourSetDic():
+    return defaultdict(ThreeSetDic)
+
+def FiveSetDic():
+    return defaultdict(FourSetDic)

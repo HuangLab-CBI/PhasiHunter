@@ -215,23 +215,43 @@ def ParseHypergeometricMap(map, phase_length):
         key = geneid+'\t'+strand+'\t'+str(sRNA_pos)
         if (key) in genewithhits.keys():
         # // 有phase_length长度的sRNA那么就仅保存phase_length长度的abundance
-            no=float((genewithhits[key]).split('\t')[0])
-            no+=sRNA_num
+        #     no=float((genewithhits[key]).split('\t')[0])
+        #     no+=sRNA_num
+        #     if sRNA_len == phase_length:
+        #         phaseAbun[key] = phaseAbun[key] + sRNA_num
+        #         genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+        #     elif genewithhits[key].split('\t')[3] == str(phase_length):
+        #         #WARNING: bug 来源地,因为这里只是保留了phase length，但是没有保留和phase length 相匹配的序列， 因此sRNA序列被覆盖了，所以结果表现出 输出的序列和打印的序列长度不一致的情况。
+        #         seq = genewithhits[key].split('\t')[2]
+        #         genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+ seq +'\t'+str(phase_length)
+        #     else:
+        #         genewithhits[key]=str(no)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+        # else:
+        #     genewithhits[key]=str(sRNA_num)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+        #     if sRNA_len == phase_length:
+        #         phaseAbun[key] = sRNA_num
+        #     else:
+        #         phaseAbun[key] = 0
+
+        # // 修复bug
             if sRNA_len == phase_length:
                 phaseAbun[key] = phaseAbun[key] + sRNA_num
-                genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+                genewithhits[key]=str(phaseAbun[key]) + '__' + str(unphaseAbun[key]) +'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
             elif genewithhits[key].split('\t')[3] == str(phase_length):
-                #WARNING: bug 来源地,因为这里只是保留了phase length，但是没有保留和phase length 相匹配的序列， 因此sRNA序列被覆盖了，所以结果表现出 输出的序列和打印的序列长度不一致的情况。
+                unphaseAbun[key] = unphaseAbun[key] + sRNA_num
                 seq = genewithhits[key].split('\t')[2]
-                genewithhits[key]=str(phaseAbun[key])+'\t'+sRNA+'\t'+ seq +'\t'+str(phase_length)
+                genewithhits[key]=str(phaseAbun[key])+ '__' + str(unphaseAbun[key]) + '\t'+sRNA+'\t'+ seq +'\t'+str(phase_length)
             else:
-                genewithhits[key]=str(no)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
+                unphaseAbun[key] = unphaseAbun[key] + sRNA_num
+                genewithhits[key]=str(phaseAbun[key]) + '__' + str(unphaseAbun[key]) + '\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
         else:
-            genewithhits[key]=str(sRNA_num)+'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
             if sRNA_len == phase_length:
                 phaseAbun[key] = sRNA_num
+                unphaseAbun[key] = 0
             else:
                 phaseAbun[key] = 0
+                unphaseAbun[key] = sRNA_num
+            genewithhits[key]=str(phaseAbun[key]) + '__' + str(unphaseAbun[key]) +'\t'+sRNA+'\t'+line1[4]+'\t'+str(sRNA_len)
 
     return genewithhits
 
@@ -405,7 +425,7 @@ def FirstScaning(mapdata: dict, setting: tuple):
         pvalue = 0.0
         line = mapdata[k].split('\t')
         key = k.split('\t')
-        sRNA_no = float(line[0])
+        # sRNA_no = float(line[0])
         sRNA = line[1]
         strand = key[1]
         geneid = key[0]
@@ -464,7 +484,7 @@ def FirstScaning(mapdata: dict, setting: tuple):
             if pvalue <= pvalue_cutoff and pvalue != 0.0:
                 for i in range(len(phasiRNA)):
                     value_list = phasiRNA[i].split('\t')
-                    sRNA_no = float(value_list[3])
+                    sRNA_no = float(value_list[3].split('__')[0])
                     if sRNA_no > max_readn:
                         max_readn = sRNA_no
 
@@ -1182,7 +1202,7 @@ def ReverseFirstScaning(mapdata: dict, setting: tuple):
         pvalue = 0.0
         line = mapdata[k].split('\t')
         key = k.split('\t')
-        sRNA_no = float(line[0])
+        # sRNA_no = float(line[0])
         sRNA = line[1]
         strand = key[1]
         geneid = key[0]
@@ -1241,7 +1261,7 @@ def ReverseFirstScaning(mapdata: dict, setting: tuple):
             if pvalue <= pvalue_cutoff and pvalue != 0.0:
                 for i in range(len(phasiRNA)):
                     value_list = phasiRNA[i].split('\t')
-                    sRNA_no = float(value_list[3])
+                    sRNA_no = float(value_list[3].split('__')[0])
                     if sRNA_no > max_readn:
                         max_readn = sRNA_no
 
@@ -1532,7 +1552,8 @@ def HypergeometricOutput(final_sRNAs, fo):
             for j in final_sRNAs[gene][i]:
                 l = final_sRNAs[gene][i][j].split("\t")
                 record = l[-1]
-                outstring = "\t".join(l[:-1]) + "\t" + "-" + "\t" + "-" + "\t" + "-" + "\t" + "-" + "\t" + record + "\n"
+                out_list = [l[0], l[1], l[2], l[3].split('__')[0], l[3].split('__')[1], l[4], l[5], l[6], l[7], l[8]]
+                outstring = "\t".join(out_list) + "\n"
                 fo.write(outstring)
 
 def ParallelPhaseScore(parallel_number, type_, mapfile, ref, phase_length, extended_maplen, tmpfile, max_hits, real_gdna_map, phase_number, o, fa, all, phaseScore_cutoff, phaseRatio_cutoff, island):

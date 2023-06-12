@@ -107,6 +107,7 @@ def main():
             # necessary options:
     
             # options with default value
+            [0]: format combien category result
             [1]: chr_start:end to chr start end
             [2]: chr start end to chr:start-end
             [3]: a.fa\\nb.fa to a.fa,b.fa
@@ -122,6 +123,9 @@ def main():
             [13]: filter XRR_1234--1 to XRR_1234
             [14]: extractForphasiRNA
             [15]: extractForPHASLoci
+            [16]: phasiRNAnalyzer filter
+            [17]: tissueAnalysis
+            [18]: tissueFormat
     
             # optional options
     
@@ -143,6 +147,7 @@ def main():
 
     fo = readStdin()
     rDic = {
+        0: catFormat,
         1 : convertFormat,
         2 : convertForIGVVisulization,
         3 : convertToMultiplePhaseTankInputFormat,
@@ -158,10 +163,32 @@ def main():
         13: caculategDNAClusterNumber,
         14: extractForphasiRNA,
         15: extractForPHASLoci,
+        16: phasiRNAnalyzer_filter,
+        17: tissueAnalysis,
+        18: tissueFormat,
             }
 
     if method in rDic:
         rDic[method](fo)
+
+def catFormat(fo):
+    tag = 'y'
+    for i in sorted(fo[:1]):
+        l = i.split("\t")
+        Category,Small_RNA,Target_gene,sRNA_loc,Deg_loc,Deg_count,sRNA_seq,Shift,Gene_annotation = l[0],l[1],l[2],l[3],l[4],l[5],l[6],l[7],l[8]
+        if Category == 'Category' and tag == 'y':
+            print(i)
+            tag = 'n'
+            continue
+        if Category == 'Category' and tag == 'n':
+            continue
+        print(i)
+    for i in sorted(fo[1:]):
+        l = i.split("\t")
+        Category,Small_RNA,Target_gene,sRNA_loc,Deg_loc,Deg_count,sRNA_seq,Shift,Gene_annotation = l[0],l[1],l[2],l[3],l[4],l[5],l[6],l[7],l[8]
+        if Category == 'Category':
+            continue
+        print(i)
 
 def phasiHunterHypergeometricCDNAFormat(fo):
     for i in fo:
@@ -236,7 +263,7 @@ def generatingExonRegion(fo):
             rna = j[0]
         except IndexError:
             rna = j
-        if rna != former_rna:
+        if rna != former_rna: # 进入第一个RNA
             o_start = start
             print(f'{rna}\t1\t{end - start}')
             former_rna = rna
@@ -423,6 +450,48 @@ def extractForPHASLoci(fo):
                                 print(f'{geneid} Other:{feature} PG {start} {end}')
                             else:
                                 print(f'{geneid} {feature}:{geneid} PG {start} {end}')
+
+
+def phasiRNAnalyzer_filter(fo):
+    dic = OneDepDic()
+    for line in fo:
+        line1 = line.strip()
+        l = line.strip().split("\t")
+        id, strand, start, abun, sran, seq, anno, pvalue, record = l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8]
+        length = len(seq)
+        if length == 21:
+            dic[record].append(line1)
+        else:
+            continue
+    for record in dic:
+        for line1 in dic[record]:
+            if len(dic[record]) >= 4:
+                print(line1)
+
+def tissueAnalysis(fo):
+    dic = OneDepDic()
+    total_abun = 0
+    total_count = 0
+    for line in fo:
+        line1 = line.strip()
+        l = line.strip().split("\t")
+        abun = float(l[1])
+        total_abun += abun
+        total_count += 1
+    print(f'Total phasiRNA number: {total_count}')
+    print(f'Total phasiRNA abun: {total_abun}')
+
+
+def tissueFormat(fo):
+    dic = OneDepDic()
+    for line in fo:
+        line1 = line.strip()
+        l = line.strip().split("\t")
+        lib = l[2]
+        id = l[0]
+        seq = l[1]
+        abun = id.split('__')[3]
+        print(f'{lib}\t{seq}\t{abun}')
 
 if __name__ == "__main__":
     main()

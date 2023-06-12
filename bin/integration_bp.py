@@ -8,16 +8,12 @@ def main1():
     passP = 'y'
     phase_number = 4
     phase_length = 21
-    pvalue_cutoff = 0.0005
+    pvalue_cutoff = 0.001
     min_read_num = 0
     parallel_number = 1
     island_number = 5
     flnc_anno = ''
     gdna_enable = 'n'
-    outfile = 'integration_o.txt'
-    PHAS_Loci_out = 'integration_p.txt'
-    allfile = 'integration_a.txt'
-    intergrationfile = 'integration_s.txt'
     help = '''
     phase usage:
         option:
@@ -163,10 +159,9 @@ def main1():
     tmp_intergration = Write_new(hout, pout, hanno, panno, p_phasiRNA_cluster, fo_phasiRNA, fo_allsiRNA, transcriptAnno, flnc_anno_dic)
     intergration = tmp_intergration[0]
     intergration_FLNC = tmp_intergration[1]
-    tag_dic = tmp_intergration[2]
     fo_phasiRNA.close()
 
-    feature_list = ['lncRNA', 'Other', 'mRNA', 'rRNA', 'transcript', 'intron', 'FLNC', 'lnc_RNA', 'transcripts', 'LncRNA', 'Lnc_RNA', 'ncRNA', 'NCRNA', 'LNCRNA', 'MRNA', 'nc_RNA']
+    feature_list = ['lncRNA', 'Other', 'mRNA', 'rRNA', 'transcript', 'intron', 'FLNC', 'lnc_RNA', 'transcripts', 'LncRNA', 'Lnc_RNA']
     filter_intergration = FormatForWriteInterGration(intergration, feature_list)
     relation_dic = filter_intergration[1]
 
@@ -187,15 +182,13 @@ def main1():
                 line1 = line.strip()
                 l = line.strip().split("\t")
                 feature = l[1]
-                if line1.startswith('cluster_number'):
-                    continue
                 if feature != 'Intergenic':
                     fo_Non_intergenic.write(line1 + '\n')
         fo_Non_intergenic.close()
         overlap_Intergenic_fo = tmp_variable
         Integration_overlap(overlap_Intergenic_fo, fo_intergration, passP)
         fo_intergration.close()
-        PHAS_Loci1 = Intergenic_PHAS_Loci(intergrationfile, tag_dic)
+        PHAS_Loci1 = Intergenic_PHAS_Loci(intergrationfile)
         PHAS_Loci_out_write(PHAS_Loci_out, PHAS_Loci, PHAS_Loci1, passP)
         catCombine(Non_intergenic, intergrationfile)
     Vprint('intergration finished!', enable=True)
