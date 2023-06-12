@@ -17,8 +17,9 @@ subcommand:
     phase:          predicting phasiRNA cluster based on multiple reference sequences
     intergration:   intergrating phase output
     visulization:   for phasiRNA cluster visulization
+    target:         for sRNA target prediction 
     initiator:      for phasiRNA initiator prediction
-    deg:            for phasiRNA initiator or phase-target degradome verrification
+    deg:            for phasiRNA initiator or phase-target degradome verification
 
 type phasiHunter subcommad -h for more subcommad detail"
 exit 1
