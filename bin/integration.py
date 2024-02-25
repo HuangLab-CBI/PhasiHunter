@@ -146,7 +146,8 @@ def main1():
 
     Vprint(f'Start run {programName}', enable=True)
     print(f'Threads: {parallel_number}')
-    TMP_WD = os.path.dirname(intergrationfile)
+    TMP_WD = os.path.abspath(intergrationfile)
+    TMP_WD = os.path.dirname(TMP_WD)
     ctime = GetCurTime()
     tmp_folder = f'{ctime}_tmpfolder'
     cmd = f'mkdir {tmp_folder}'
@@ -167,8 +168,10 @@ def main1():
     fo_intergration = open(intergrationfile, 'w')
     # ----------> loading data <------------
     print(f'Loading data')
-    Gff3Tobed(gff3, tmp_gff_bed)
-    TMP_WD = os.path.dirname(intergrationfile)
+    gff3type = checkgff3(gff3)
+    Gff3Tobed(gff3, tmp_gff_bed, gff3type)
+    TMP_WD = os.path.abspath(intergrationfile)
+    TMP_WD = os.path.dirname(TMP_WD)
     ctime = GetCurTime()
     tmp_phasiRNAfile = f'{TMP_WD}/{tmp_folder}/{ctime}{os.path.basename(intergrationfile)}_phasiRNA.txt'
     tmp_allsiRNAfile = f'{TMP_WD}/{tmp_folder}/{ctime}{os.path.basename(intergrationfile)}_allsiRNA.txt'
@@ -233,7 +236,7 @@ def main1():
     relation_dic = filter_intergration[1]
 
     tmp_out_list = WriteIntergration_new(filter_intergration[0])
-    PHAS_Loci = WriteIntergration_new_dup(filter_intergration[0], tmp_gff_bed, relation_dic, intergration_FLNC, flnc_anno_dic)
+    PHAS_Loci = WriteIntergration_new_dup(filter_intergration[0], tmp_gff_bed, relation_dic, intergration_FLNC, flnc_anno_dic, gff3type)
 
     if gdna_enable == 'n':
         duplication_dic = FinalOut(tmp_out_list, relation_dic, fo_intergration, passP)
@@ -263,7 +266,7 @@ def main1():
     Vprint('Intergration finished!', enable=True)
     fo_allsiRNA.close()
     print(f'delete temporary folder {TMP_WD}/{tmp_folder}')
-    os.system(f'rm -r {TMP_WD}/{tmp_folder}')
+    # os.system(f'rm -r {TMP_WD}/{tmp_folder}')
 
     # detect AS/APA related sRNA
     if as_apa_out != '':

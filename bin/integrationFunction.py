@@ -1,6 +1,7 @@
 import time
 from sympy import binomial
 from collections import defaultdict
+import re
 import os
 from concurrent.futures import ProcessPoolExecutor, wait, ALL_COMPLETED
 
@@ -45,22 +46,74 @@ def Vprint(string, enable = False, time = True):
         if enable:
             print(string)
 
-def Gff3Tobed(gff3file, outfile):
+def checkgff3(gff3file):
+    gff3type = 'unknown'
+    with open(gff3file, 'r') as fn:
+        for i in range(10000):
+            line = fn.readline()
+            if re.search('NCBI_Assembly', line, flags=re.IGNORECASE):
+                gff3type = 'ncbi'
+                print(f'Detected gff3 annotation: NCBI')
+                break
+            elif re.search('phytozome', line, flags=re.I):
+                gff3type = 'phytozome'
+                print(f'Detected gff3 annotation: phytozome')
+                break
+            else:
+                gff3type = 'ensemble'
+    
+    return gff3type
+
+def Gff3Tobed(gff3file, outfile, gff3type):
     fo = open(outfile, 'w')
+    spe = 'NA'
     with open(gff3file, 'r') as fn:
         for line in fn:
             l = line.strip().split("\t")
             if line.startswith("#"):
+                try:
+                    version = re.search('annot-version.*', line).group().replace('annot-version ', '')
+                except AttributeError:
+                    pass
+            if line.startswith("#"):
+                try:
+                    spe = re.search('species.*', line).group().replace('species ', '')
+                except AttributeError:
+                    pass
                 continue
             chr_, feature, start, end, longstring, strand = l[0], l[2], l[3], l[4], l[8], l[6]
             if int(start) > int(end): 
                 continue
             if feature == 'region':
                 continue
-            anno = "-".join(longstring.split(";")[0].split('-')[1:])
-            if anno == '':
-                continue
-            else:
+            if gff3type == 'ncbi':
+                if re.match('NW_', chr_):
+                    continue
+                anno = "-".join(longstring.split(";")[0].split('-')[1:])
+                if anno == '':
+                    continue
+                else:
+                    fo.write(f'{chr_}\t{start}\t{end}\t{feature}\t{anno}\t{strand}\n')
+            elif gff3type == 'phytozome':
+                if re.match('chrsy|chrun', chr_, re.I):
+                    continue
+                if spe.lower() == 'oryza sativa':
+                    anno = longstring.split(';')[0].split('=')[1].replace('.MSU' + version, '').replace('.'+feature+'.', '-')
+                else:
+                    anno = longstring.split(';')[0].split('=')[1].replace('.' + version, '').replace('.'+feature+'.', '-')
+                fo.write(f'{chr_}\t{start}\t{end}\t{feature}\t{anno}\t{strand}\n')
+            elif gff3type == 'ensemble':
+                if not re.match('\d+', chr_):
+                    continue
+                if "ID=chromosome" in longstring:
+                    continue
+                if feature != 'exon':
+                    try:
+                        anno = longstring.split(';')[0].split(':')[1]
+                    except IndexError:
+                        pass
+                elif feature == 'exon':
+                    anno = longstring.split(';')[1].split('=')[1]
                 fo.write(f'{chr_}\t{start}\t{end}\t{feature}\t{anno}\t{strand}\n')
     fo.close()
 
@@ -725,7 +778,7 @@ def ParseGff3(file: str):
         grandParentList = ['region']
         pararentList = ['gene', 'cDNA_match', 'match', 'pseudogene']
         sonList = ['lnc_RNA', 'transcript', 'mRNA', 'primary_transcript', 'snoRNA', 'tRNA', 'rRNA', 'snRNA']
-        grandSonList = ['exon', 'CDS', 'miRNA', 'intron']
+        grandSonList = ['exon', 'CDS', 'miRNA', 'intron', 'three_prime_UTR', 'five_prime_UTR']
         for line in fn:
             if line.startswith("#"):
                 continue
@@ -1157,7 +1210,7 @@ def GeneratingIntronInforFromGff(tmp_gff_bed):
             l = line.strip().split("\t")
             Chr, start, end, feature, anno, strand = l[0], int(l[1]), int(l[2]), l[3], l[4], l[5]
             filter_anno = "-".join(anno.split('-')[:-1])
-            filter_order = (anno.split('-')[-1])
+            filter_order = (anno.split('-')[-1]).replace('E', '')
             if feature == 'exon':
                 if former_feature == feature and former_fiter_anno == filter_anno:
                     if former_end + 1 > start - 1:
@@ -1205,7 +1258,7 @@ def GetPhasiRNAClusterBed(hout_pout, bedout, Type, phase_length):
     fo.close()
 
 def AnnoGdnaWithBedtools(tmp_hout_bed, tmp_gff_bed):
-    fo = os.popen(f'bedtools intersect -a {tmp_hout_bed} -b {tmp_gff_bed} -wao | cut -f 1,2,3,7,8,9,10')
+    fo = os.popen(f'bedtools intersect -nonamecheck -a {tmp_hout_bed} -b {tmp_gff_bed} -wao | cut -f 1,2,3,7,8,9,10')
     return fo
 
 def WringIntronInforToGff(intron_infor, tmp_gff_bed):
@@ -2075,7 +2128,7 @@ def catCombine(Non_intergenic, intergrationfile):
     # print(cmd)
     os.system(cmd)
 
-def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergration_FLNC, flnc_anno_dic):
+def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergration_FLNC, flnc_anno_dic, gff3type):
     trans = nestedDic()
     with open(tmp_gff_bed, 'r') as fn:
         for line in fn:
@@ -2083,11 +2136,16 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
             l = line.strip().split("\t")
             chr_,start,end,feature,anno,strand = l[0],int(l[1]),int(l[2]),l[3],l[4],l[5]
             if feature == 'exon':
-                gene = anno.split('-')[0]
+                if gff3type == 'ensemble':
+                    gene = re.sub('-E\d+$', '', anno)
+                elif gff3type == 'ncbi':
+                    gene = anno.split('-')[0]
+                elif gff3type == 'phytozome':
+                    gene = anno.split('-')[0]
                 if gene in intergration:
                     recoder = anno.split('-')[1]
                     if strand == '-':
-                        if recoder == '1':
+                        if recoder == '1' or recoder == '01':
                             tmp = 0
                             tmp = end - start + 1 + tmp
                             for i in range(1, end-start+2):
@@ -2097,7 +2155,7 @@ def WriteIntergration_new_dup(intergration, tmp_gff_bed, relation_dic, intergrat
                                 trans[gene][i] = end + tmp + 1 - i
                             tmp = end - start + 1 + tmp
                     elif strand == '+':
-                        if recoder == '1':
+                        if recoder == '1' or recoder == '01':
                             tmp = 0
                             tmp = end - start + 1 + tmp
                             for i in range(1, end-start+2):
