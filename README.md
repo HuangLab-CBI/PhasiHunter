@@ -29,31 +29,56 @@ A multithreaded program for mining phasiRNA regulation pathways based on multipl
 ## Dependencies
 phasihunter is a CLI program runing on linux platform. The correction runing of phasihunter depends on some existing softwares.
 - Bowtie (Langmead, et al., 2009. Genome Biol)
-- Biopython (Cock, et al., 2009. Bioinformatics)
 - Bedtools (Quinlan and Hall, 2010. Bioinformatics)
 - Dnapi (Tsuji and Weng, 2016. PloS One)
-- Trim_galore (https://github.com/FelixKrueger/TrimGalore)
+- Trim\_galore (https://github.com/FelixKrueger/TrimGalore)
 - Seqkit (Shen, et al., 2016. PloS One)
 - Perl5 (https://www.perl.org)
 - Fasta36 (Pearson and Lipman, 1988. Proc Natl Acad Sci U S A)
 - TarHunter (Ma, et al., 2018. Bioinformatics)
 
+Python packages also required:
+- Biopython (Cock, et al., 2009. Bioinformatics)
+- pyyaml
+- matplotlib
+- sympy 
+
 ## Installation
 ### Manual Installation
-1. Install all dependencies
-2. Clone phasihunter
+1. Clone phasihunter repository
 
-    `git clone https://github.com/HuangLab-CBI/PhasiHunter.git .`
+Using git:
 
-3. Setting enviroment variable in ~/.bashrc
+    git clone https://github.com/HuangLab-CBI/PhasiHunter.git
 
-    `echo "export PATH=\$PATH:<phasihunter PATH> >> ~/.bashrc"`
+2. Install all dependencies
 
-    example:
+You can manually install each dependency listed above, or alternatively a conda environment file is provided in this repositoty (`environment.yml`), and can be used to install the dependencies with the following command:
+   
+    conda env create  --file environment.yml
+
+(If you have mamba installed you can replace `conda` in the above command with `mamba`.)
+
+Access the dependencies using:
+
+    conda activate phasiHunter
+
+3. Adding the executable to your $PATH
+
+If you are using conda you can simply symlink the `phasiHunter` executable to the conda environment bin. 
+In the activated conda environemnt, run:
+
+    ln -s <full path to phasiHunter directory>/phasiHunter $CONDA_PREFIX/bin/phasiHunter
+
+Otherwise you can add phasiHunter to your PATH by setting the enviroment variable in ~/.bashrc
+
+    echo "export PATH=$PATH:<phasihunter PATH> >> ~/.bashrc"
+
+example:
     
-    `echo "export PATH=\$PATH:/home/user/volumes/PhasiHunter >> ~/.bashrc"`
+    echo "export PATH=$PATH:/home/user/volumes/PhasiHunter >> ~/.bashrc"
 
-4. type `phasihunter -h` to check phasihunter whether installation correct. If phasiHunter is installed correctly you will see the following content.
+4. type `phasiHunter -h` to check whether the installation was correct. If phasiHunter is installed correctly you will see the following content.
 
     ![Alt text](image/image.png)
 
@@ -61,10 +86,6 @@ phasihunter is a CLI program runing on linux platform. The correction runing of 
 **For convenience, we also provide a Docker image at `https://hub.docker.com/repository/docker/zacksfeng/phasihunter`**
 
 The Docker image has been configured with all the dependencies required for running phasiHunter.
-
-### Conda/mamba configure file
-
-We also provide a conda/mamba environment configuration file. User can install all the required dependencies with command `conda/mamba create -f /foo/PhasiHunter/bin/env.yaml`
 
 ## Demo data
 **Download link**
